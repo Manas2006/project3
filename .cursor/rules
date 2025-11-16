@@ -1,0 +1,289 @@
+# 🔥 FULL CURSOR PROJECT PROMPT — COMPLETE SPECIFICATION
+
+## Project Title
+
+**Fine-Tuning DistilGPT-2 for Sentiment Classification and Measuring Forgetting on a Boolean QA Task**
+
+---
+
+# 1. PROJECT GOAL
+
+Build a **three-notebook pipeline** that:
+
+### Notebook 01 — Dataset Preparation
+
+* Loads and preprocesses a **multiclass sentiment dataset** from Hugging Face.
+* Converts each example into an **instruction-style prompt** and **target**.
+* Combines prompt+label into a single LM training string.
+* Tokenizes the dataset for **DistilGPT-2** (128-token max length).
+* Saves the tokenized training/test splits to disk.
+* Also loads or generates a **BoolQ-style evaluation set** for binary QA (2–5 examples).
+* Saves BoolQ eval set to `data/boolq_eval.json`.
+
+### Notebook 02 — Baseline Evaluation + Fine-Tuning
+
+* Loads tokenized datasets from disk.
+* Loads a fresh pretrained DistilGPT-2.
+* Evaluates **baseline sentiment accuracy**.
+* Evaluates **baseline BoolQ accuracy**.
+* Fine-tunes DistilGPT-2 on the tokenized sentiment dataset.
+* Saves the fine-tuned model.
+* Evaluates **post-fine-tuning** accuracy on:
+  * sentiment
+  * BoolQ
+* Computes change in accuracy and prints forgetting summary.
+
+### Notebook 03 — Analysis, Visualizations, and Report
+
+* Loads eval logs and results.
+* Builds **bar charts** comparing:
+  * baseline vs fine-tuned sentiment accuracy
+  * baseline vs fine-tuned BoolQ accuracy
+* Computes **forgetting = baseline_boolq – finetuned_boolq**
+* Generates:
+  * confusion matrix for sentiment
+  * sample generations before vs after FT
+* Produces a clean **final summary section** suitable for the class report.
+
+---
+
+# 2. DIRECTORY STRUCTURE
+
+Cursor should maintain this folder layout:
+
+```
+project/
+│
+├── data/
+│   ├── tokenized_sentiment_train/
+│   ├── tokenized_sentiment_test/
+│   ├── boolq_eval.json
+│
+├── models/
+│   └── distilgpt2_sentiment_ft/
+│
+├── notebook1_dataset_preparation.ipynb
+├── notebook2_finetune_and_forgetting.ipynb
+├── notebook3_analysis.ipynb
+│
+└── README.md
+```
+
+---
+
+# 3. DATA USED
+
+### Sentiment Dataset
+
+```
+dataset = "Sp1786/multiclass-sentiment-analysis-dataset"
+labels = {0: "negative", 1: "neutral", 2: "positive"}
+```
+
+### BoolQ Eval Set
+
+A small manually created binary dataset with fields:
+
+```
+{
+    "question": "...",
+    "passage": "...",
+    "answer": "yes" | "no",
+    "prompt": "Passage: ...\nQuestion: ... (yes or no)\nAnswer:"
+}
+```
+
+---
+
+# 4. PROMPT FORMAT FOR SENTIMENT TRAINING
+
+For each row:
+
+```
+Text: <original_text>
+Question: What is the sentiment? (negative, neutral, positive)
+Answer: <label>
+```
+
+`"target"` should be only the label string.
+
+The LM training string must be:
+
+```
+text_for_lm = prompt + " " + target
+```
+
+---
+
+# 5. TOKENIZATION RULES
+
+* Model: `"distilgpt2"`
+* Max length: **128**
+* Truncate long sequences
+* Use `tokenizer.eos_token` as padding token
+* Remove original non-token fields after tokenization
+* Labels should equal `input_ids.copy()` for causal LM
+
+---
+
+# 6. BASELINE EVALUATION LOGIC
+
+## Sentiment Prediction
+
+Generation parameters:
+
+```
+max_new_tokens=3
+do_sample=False
+```
+
+Normalization:
+
+* decode
+* strip whitespace
+* lowercase
+* take first token before any space
+
+Compare to target.
+
+## BoolQ Prediction
+
+Scores each label:
+
+* Build prompt
+* Append candidate answer
+* Compute LM score (negative log-likelihood per token)
+* Pick label with highest score
+
+---
+
+# 7. FINE-TUNING CONFIG
+
+### TrainingArguments
+
+```
+output_dir="models/distilgpt2_sentiment_ft"
+num_train_epochs=2
+per_device_train_batch_size=2
+gradient_accumulation_steps=8
+learning_rate=5e-5
+weight_decay=0.01
+logging_steps=100
+save_strategy="no"
+report_to=[]
+```
+
+### Trainer
+
+* Use `DataCollatorForLanguageModeling` with `mlm=False`
+* Train on tokenized sentiment train set
+* Evaluate after training
+
+---
+
+# 8. POST-FT EVALUATION
+
+Run the same exact evaluation functions:
+
+* `evaluate_sentiment_accuracy`
+* `evaluate_boolq_accuracy`
+
+Compute:
+
+```
+forgetting = baseline_boolq - finetuned_boolq
+```
+
+Store results in a dict written to disk:
+
+```
+results.json = {
+    "baseline_sentiment": float,
+    "baseline_boolq": float,
+    "finetuned_sentiment": float,
+    "finetuned_boolq": float,
+    "forgetting": float
+}
+```
+
+---
+
+# 9. NOTEBOOK 03 VISUALIZATION REQUIREMENTS
+
+## Charts
+
+* bar chart for before/after sentiment accuracy
+* bar chart for before/after BoolQ accuracy
+* confusion matrix for sentiment
+* forgetting summary bar
+
+## Narrative Analysis
+
+Notebook must include Markdown sections:
+
+* interpretation of accuracy changes
+* explanation of forgetting
+* limitations of the experiment
+* future work
+
+---
+
+# 10. STYLE AND QUALITY REQUIREMENTS
+
+### All Notebooks Should Have:
+
+* Clean Markdown headers
+* Clear code blocks
+* No unused cells
+* No unexplained variables
+* Progress bars using `tqdm`
+* Zero pad-token warnings (set `pad_token=eos_token`)
+* Commented code explaining key operations
+
+### All Python Code Must:
+
+* Be deterministic (seed=42 everywhere)
+* Be well-commented
+* Avoid unnecessary complexity
+* Use meaningful variable names
+* Print intermediate checks for debugging
+
+---
+
+# 11. WHAT CURSOR SHOULD DO WHEN ASKED FOR CODE
+
+When the user asks to "generate Notebook 1" or "fix a cell", Cursor should:
+
+* Follow the structure and rules above
+* Regenerate missing or broken cells
+* Use correct HF Trainer logic
+* Ensure tokenization and data are correct
+* Never invent new datasets or change formats without instructions
+* Produce clean, runnable code blocks ready for Jupyter
+
+---
+
+# 12. FINAL OUTPUT EXPECTATIONS
+
+By the end of the project, we must have:
+
+1. **Notebook 1** — dataset preparation, tokenization, saving datasets
+2. **Notebook 2** — baselines, fine-tuning, post-training evaluation
+3. **Notebook 3** — charts, analysis, final report summaries
+4. **Saved fine-tuned model**
+5. **Saved results.json**
+6. **Professional-quality figures**
+7. **Clear explanation of forgetting**
+
+---
+
+# If Cursor Needs to Disambiguate
+
+It should always ask:
+
+> "Which of the three notebooks should this change apply to?"
+
+---
+
+# This completes the full project specification.
+
