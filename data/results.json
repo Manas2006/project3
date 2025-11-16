@@ -1,0 +1,7 @@
+{
+  "baseline_sentiment": 0.59,
+  "baseline_boolq": 0.578,
+  "finetuned_sentiment": 0.72,
+  "finetuned_boolq": 0.504,
+  "forgetting": 0.07399999999999995
+}
