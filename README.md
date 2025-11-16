@@ -18,7 +18,7 @@ project/
 │   └── distilgpt2_sentiment_ft/       # Fine-tuned model checkpoints
 │
 ├── notebook1_dataset_preparation.ipynb     # Dataset loading and preprocessing
-├── notebook2_finetune_and_forgetting.ipynb # Baseline eval, fine-tuning, forgetting measurement
+├── notebook2_finetune_and_forgetting.ipynb # Baseline eval, load pre-FT model, forgetting measurement
 ├── notebook3_analysis.ipynb                # Visualizations and final report
 │
 └── README.md
@@ -29,18 +29,18 @@ project/
 ### Notebook 1: Dataset Preparation
 - Loads multiclass sentiment dataset from Hugging Face (`Sp1786/multiclass-sentiment-analysis-dataset`)
 - Converts examples to instruction-style prompts
-- Tokenizes datasets for DistilGPT-2 (128-token max length)
+- Tokenizes datasets for DistilGPT-2 (max length 128; `pad_token=eos_token`; `labels=input_ids` for causal LM)
 - Saves tokenized train/test splits
-- Creates BoolQ evaluation set (2-5 examples)
+- Builds a larger BoolQ evaluation set (default 500 examples) from the official `google/boolq` validation split
 - Saves BoolQ eval set to `data/boolq_eval.json`
 
 ### Notebook 2: Fine-Tuning and Forgetting Measurement
 - Loads tokenized datasets and pretrained DistilGPT-2
 - Evaluates baseline performance on sentiment and BoolQ tasks
-- Fine-tunes DistilGPT-2 on sentiment classification
+- Loads the fine-tuned sentiment model from `models/distilgpt2_sentiment_ft/` (training code provided but commented out for local runs)
 - Evaluates post-fine-tuning performance
 - Computes forgetting metric: `baseline_boolq - finetuned_boolq`
-- Saves model and evaluation results
+- Writes consolidated results to `data/results.json`
 
 ### Notebook 3: Analysis and Visualizations
 - Loads evaluation results
@@ -55,12 +55,17 @@ project/
 pip install transformers datasets torch scikit-learn matplotlib seaborn tqdm numpy
 ```
 
+Optional (GPU PyTorch, e.g., CUDA 12.1):
+```bash
+pip install "torch" --index-url https://download.pytorch.org/whl/cu121
+```
+
 ## Usage
 
 Run the notebooks in order:
 
 1. **Notebook 1**: Prepares and tokenizes the datasets
-2. **Notebook 2**: Performs baseline evaluation, fine-tuning, and measures forgetting
+2. **Notebook 2**: Performs baseline evaluation, loads the pre‑fine‑tuned model, and measures forgetting
 3. **Notebook 3**: Generates visualizations and analysis
 
 ## Dataset Details
@@ -71,9 +76,11 @@ Run the notebooks in order:
 - **Format**: Instruction-style prompts with sentiment labels
 
 ### BoolQ Evaluation Set
-- **Type**: Binary QA (yes/no questions)
-- **Fields**: `question`, `passage`, `answer`, `prompt`
-- **Purpose**: Measure catastrophic forgetting on a different task
+- **Source**: `google/boolq` (Hugging Face, validation split)
+- **Type**: Binary QA (yes/no questions), reformatted to instruction prompts
+- **Size**: Default 500 sampled examples (configurable in Notebook 1)
+- **Fields**: `question`, `passage`, `answer` ∈ {yes,no}, and `prompt`
+- **Purpose**: Measure catastrophic forgetting on a different, passage‑grounded task
 
 ## Training Configuration
 
@@ -83,23 +90,29 @@ Run the notebooks in order:
 - **Batch Size**: 2 (with gradient accumulation steps: 8)
 - **Learning Rate**: 5e-5
 - **Weight Decay**: 0.01
+- **Where training happens**: Externally (e.g., Google Colab). Notebook 2 loads `models/distilgpt2_sentiment_ft/`; the Trainer code is present but commented.
 
 ## Evaluation Metrics
 
 - **Sentiment Accuracy**: Classification accuracy on sentiment test set
-- **BoolQ Accuracy**: Binary QA accuracy on BoolQ evaluation set
+- **BoolQ Accuracy**: Binary QA accuracy on the large BoolQ evaluation set
 - **Forgetting**: Difference between baseline and fine-tuned BoolQ accuracy
 
 ## Output Files
 
 - `models/distilgpt2_sentiment_ft/`: Fine-tuned model directory
-- `results.json`: Evaluation results (baseline and fine-tuned accuracies, forgetting metric)
-- Visualizations in Notebook 3 (bar charts, confusion matrix)
+- `data/results.json`: Evaluation results (baseline and fine-tuned accuracies, forgetting)
+- Figures saved by Notebook 3:
+  - `sentiment_accuracy_comparison.png`
+  - `boolq_accuracy_comparison.png`
+  - `forgetting_summary.png`
+  - `sentiment_confusion_matrix.png`
 
 ## Notes
 
 - All code uses `seed=42` for reproducibility
 - Tokenizer uses `eos_token` as padding token to avoid warnings
+- During generation we pass `attention_mask` for stable decoding
 - Progress bars implemented using `tqdm`
 - Deterministic evaluation with consistent random seeds
 
