@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Is the sky blue during the day?",
+    "passage": "The sky appears blue during daytime due to Rayleigh scattering of sunlight by atmospheric particles.",
+    "answer": "yes",
+    "prompt": "Passage: The sky appears blue during daytime due to Rayleigh scattering of sunlight by atmospheric particles.\nQuestion: Is the sky blue during the day? (yes or no)\nAnswer:"
+  },
+  {
+    "question": "Do penguins fly?",
+    "passage": "Penguins are flightless birds that have adapted to life in the water. They use their wings as flippers for swimming.",
+    "answer": "no",
+    "prompt": "Passage: Penguins are flightless birds that have adapted to life in the water. They use their wings as flippers for swimming.\nQuestion: Do penguins fly? (yes or no)\nAnswer:"
+  },
+  {
+    "question": "Is water a liquid at room temperature?",
+    "passage": "Water exists as a liquid at standard room temperature of approximately 20-25 degrees Celsius.",
+    "answer": "yes",
+    "prompt": "Passage: Water exists as a liquid at standard room temperature of approximately 20-25 degrees Celsius.\nQuestion: Is water a liquid at room temperature? (yes or no)\nAnswer:"
+  },
+  {
+    "question": "Can humans breathe underwater without equipment?",
+    "passage": "Humans cannot breathe underwater without special equipment like scuba gear. Our lungs are designed to extract oxygen from air, not water.",
+    "answer": "no",
+    "prompt": "Passage: Humans cannot breathe underwater without special equipment like scuba gear. Our lungs are designed to extract oxygen from air, not water.\nQuestion: Can humans breathe underwater without equipment? (yes or no)\nAnswer:"
+  },
+  {
+    "question": "Is the Earth flat?",
+    "passage": "Scientific evidence overwhelmingly shows that the Earth is an oblate spheroid, not flat. This has been confirmed through various observations including satellite imagery and gravitational measurements.",
+    "answer": "no",
+    "prompt": "Passage: Scientific evidence overwhelmingly shows that the Earth is an oblate spheroid, not flat. This has been confirmed through various observations including satellite imagery and gravitational measurements.\nQuestion: Is the Earth flat? (yes or no)\nAnswer:"
+  }
+]
