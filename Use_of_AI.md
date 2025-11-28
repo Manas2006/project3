@@ -1,14 +1,14 @@
 # Use of AI
 
-I used AI assistance for two purposes only. All code was written by me.
+I used AI assistance (GPT) for two very minor purposes only. All code was written by me.
 
 ## [1] Git command help
-- Tool: ChatGPT/Cursor
-- Prompt/Task: Ask for exact git commands for initializing a repo, adding remotes, committing, pushing, pulling with rebase, stashing, and resolving merge conflicts (especially for notebooks/binaries).
-- Output used: Command sequences for git workflow (no code).
+- Tool: GPT
+- Prompt: Asked for exact git commands for basic operations like committing, pushing, pulling with rebase, and handling merge conflicts.
+- Output used: Command sequences only (no code was generated).
 
-## [2] Project scaffolding
-- Tool: ChatGPT/Cursor
-- Prompt/Task: Ask for guidance on how to structure a three‑notebook ML project and the high‑level files/folders it should contain.
-- Output used: High‑level folder and file layout suggestions only. I created and implemented all notebook code myself.
+## [2] Project structure guidance
+- Tool: GPT
+- Prompt: Asked for high-level folder structure suggestions for a three-notebook ML project.
+- Output used: Only general folder/file layout ideas. I created all actual code and implementation myself.
 
