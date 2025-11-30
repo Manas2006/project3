@@ -4,6 +4,10 @@
 
 This project implements a three-notebook pipeline to fine-tune DistilGPT-2 on a multiclass sentiment classification task and measure catastrophic forgetting on a Boolean QA (BoolQ) task. The pipeline includes dataset preparation, baseline evaluation, fine-tuning, post-training evaluation, and comprehensive analysis with visualizations.
 
+## Video Presentation
+
+📹 **Project Video:** [Watch on Google Drive](https://drive.google.com/drive/folders/1yvQmQibI3LedY-dDf7bz-1WDpQ_bDtr3?usp=sharing)
+
 ## Directory Structure
 
 ```
